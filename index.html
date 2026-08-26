@@ -990,7 +990,7 @@
     let resizeColUnit = 0;
 
     function getCards() {
-      return Array.from(grid.querySelectorAll('.metric-card[data-metric-id]'));
+      return Array.from(grid.querySelectorAll('.metric-card[data-metric-id]')).filter(c => c !== dragCard);
     }
 
     function findCardSlot(clientX, clientY) {
