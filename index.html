@@ -981,6 +981,7 @@
     let cardStartX = 0, cardStartY = 0;
     let cardIsDragging = false;
     let cardPrevSlot = -1;
+    let cachedPositions = []; // 缓存拖拽前所有卡片的原始位置
 
     // 调整大小
     let resizeCard = null;
@@ -989,84 +990,80 @@
     let resizeGridWidth = 0;
     let resizeColUnit = 0;
 
-    function getCards() {
-      return Array.from(grid.querySelectorAll('.metric-card[data-metric-id]')).filter(c => c !== dragCard);
+    function getAllCards() {
+      return Array.from(grid.querySelectorAll('.metric-card[data-metric-id]'));
+    }
+
+    // 缓存所有卡片的原始位置（在 placeholder 插入之前调用）
+    function cacheCardPositions() {
+      cachedPositions = getAllCards().map(card => ({
+        el: card,
+        top: card.offsetTop,
+        left: card.offsetLeft,
+        width: card.offsetWidth,
+        height: card.offsetHeight,
+      }));
     }
 
     function findCardSlot(clientX, clientY) {
-      const cards = getCards();
-      if (cards.length === 0) return 0;
+      if (cachedPositions.length === 0) return 0;
       const gridRect = grid.getBoundingClientRect();
       const relativeX = clientX - gridRect.left;
       const relativeY = clientY - gridRect.top;
-
-      // 基于网格几何直接计算光标所在的列号（0~11）
       const gap = 12;
-      const colCount = 12;
-      const colWidth = (grid.offsetWidth - gap * (colCount - 1)) / colCount;
-      const cursorCol = Math.floor(relativeX / (colWidth + gap));
-      const col = Math.max(0, Math.min(colCount - 1, cursorCol));
 
-      // 遍历卡片，按行分组，找到光标所在的行
+      // 用缓存的原始位置按行分组
       let rowStart = 0;
-      let rowTop = cards[0].offsetTop;
-      let rowHeight = cards[0].offsetHeight;
+      let rowTop = cachedPositions[0].top;
+      let rowHeight = cachedPositions[0].height;
 
-      for (let i = 0; i < cards.length; i++) {
-        const cardTop = cards[i].offsetTop;
-        const cardBottom = cardTop + cards[i].offsetHeight;
+      for (let i = 0; i < cachedPositions.length; i++) {
+        const p = cachedPositions[i];
 
         // 新行开始
-        if (cardTop > rowTop + 2) {
-          // 光标在当前行范围内
-          if (relativeY < cardTop) {
-            break;
-          }
+        if (p.top > rowTop + 2) {
+          if (relativeY < p.top) break;
           rowStart = i;
-          rowTop = cardTop;
-          rowHeight = cards[i].offsetHeight;
+          rowTop = p.top;
+          rowHeight = p.height;
         }
 
         // 光标在这一行的垂直范围内
         if (relativeY >= rowTop && relativeY < rowTop + rowHeight + gap) {
-          // 在这一行中找到光标所在列对应的卡片
-          for (let j = rowStart; j < cards.length; j++) {
-            if (cards[j].offsetTop !== rowTop) break;
-            const cardLeft = cards[j].offsetLeft;
-            const cardRight = cardLeft + cards[j].offsetWidth;
-            const cardMidX = cardLeft + (cardRight - cardLeft) / 2;
-            if (relativeX < cardMidX) return j;
+          for (let j = rowStart; j < cachedPositions.length; j++) {
+            if (cachedPositions[j].top !== rowTop) break;
+            const midX = cachedPositions[j].left + cachedPositions[j].width / 2;
+            if (relativeX < midX) return j;
           }
-          // 光标在该行所有卡片之后
           let lastInRow = rowStart;
-          for (let j = rowStart; j < cards.length; j++) {
-            if (cards[j].offsetTop !== rowTop) break;
+          for (let j = rowStart; j < cachedPositions.length; j++) {
+            if (cachedPositions[j].top !== rowTop) break;
             lastInRow = j;
           }
           return lastInRow + 1;
         }
       }
 
-      // 光标在所有卡片下方
-      return cards.length;
+      return cachedPositions.length;
     }
 
     function moveCardPlaceholderToSlot(slot) {
       if (slot === cardPrevSlot) return;
-      const cards = getCards();
-      if (slot >= cards.length) {
+      const allCards = getAllCards();
+      // 找到 slot 对应的实际 DOM 元素（排除 dragCard）
+      const visibleCards = allCards.filter(c => c !== dragCard);
+      if (slot >= visibleCards.length) {
         grid.appendChild(cardPlaceholder);
       } else {
-        grid.insertBefore(cardPlaceholder, cards[slot]);
+        grid.insertBefore(cardPlaceholder, visibleCards[slot]);
       }
       cardPrevSlot = slot;
     }
 
-    getCards().forEach(card => {
+    getAllCards().forEach(card => {
       // 拖拽
       card.addEventListener('mousedown', function(e) {
         if (e.button !== 0) return;
-        // 如果点击的是 resize handle 或移除按钮，不触发拖拽
         if (e.target.closest('.resize-handle, .metric-remove-btn')) return;
         const interactive = e.target.closest('select, button, a, input, .link, .settings-icon');
         if (interactive) return;
@@ -1077,6 +1074,9 @@
         cardStartY = e.clientY;
         cardIsDragging = false;
         cardPrevSlot = -1;
+
+        // 在拖拽开始前缓存所有卡片的原始位置
+        cacheCardPositions();
 
         const rect = this.getBoundingClientRect();
         cardOffsetX = e.clientX - rect.left;
@@ -1093,7 +1093,6 @@
           resizeStartX = e.clientX;
           resizeStartWidth = card.offsetWidth;
           resizeGridWidth = grid.offsetWidth;
-          // 12列网格，计算每列宽度
           const gap = 12;
           resizeColUnit = (resizeGridWidth - gap * 11) / 12;
           card.classList.add('resizing');
@@ -1114,8 +1113,6 @@
           cardPlaceholder = document.createElement('div');
           cardPlaceholder.className = 'inner-drag-placeholder';
           cardPlaceholder.style.height = dragCard.offsetHeight + 'px';
-          cardPlaceholder.style.gridColumn = dragCard.style.gridColumn || '';
-          // 继承当前卡片的列跨度
           const colSpan = dragCard.getAttribute('data-col-span') || '1';
           const spanMap = { '1': 'span 2', '2': 'span 3', '3': 'span 4', '4': 'span 6', '5': 'span 8', '6': 'span 12' };
           cardPlaceholder.style.gridColumn = spanMap[colSpan] || 'span 2';
@@ -1150,13 +1147,10 @@
         const gap = 12;
         const colUnit = (resizeGridWidth - gap * 11) / 12;
 
-        // 计算应该跨越几列 (2~12)
         let colSpan = Math.round((newWidth + gap) / (colUnit + gap));
         colSpan = Math.max(2, Math.min(12, colSpan));
 
-        // 映射到 data-col-span 值 (1~6)
         const spanMap = { 2: '1', 3: '2', 4: '3', 6: '4', 8: '5', 12: '6' };
-        // 找最接近的
         const spans = [2, 3, 4, 6, 8, 12];
         let closest = spans[0];
         for (const s of spans) {
@@ -1168,7 +1162,6 @@
     });
 
     document.addEventListener('mouseup', function(e) {
-      // 结束卡片拖拽
       if (dragCard) {
         if (cardIsDragging && cardPlaceholder) {
           dragCard.style.position = '';
@@ -1187,9 +1180,9 @@
         cardPlaceholder = null;
         cardIsDragging = false;
         cardPrevSlot = -1;
+        cachedPositions = [];
       }
 
-      // 结束调整大小
       if (resizeCard) {
         resizeCard.classList.remove('resizing');
         resizeCard = null;
