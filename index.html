@@ -997,39 +997,58 @@
       const cards = getCards();
       if (cards.length === 0) return 0;
       const gridRect = grid.getBoundingClientRect();
-      const relativeX = clientX - gridRect.left + grid.scrollLeft;
-      const relativeY = clientY - gridRect.top + grid.scrollTop;
+      const relativeX = clientX - gridRect.left;
+      const relativeY = clientY - gridRect.top;
 
-      // 光标在所有卡片之上
-      if (relativeY < cards[0].offsetTop) return 0;
+      // 基于网格几何直接计算光标所在的列号（0~11）
+      const gap = 12;
+      const colCount = 12;
+      const colWidth = (grid.offsetWidth - gap * (colCount - 1)) / colCount;
+      const cursorCol = Math.floor(relativeX / (colWidth + gap));
+      const col = Math.max(0, Math.min(colCount - 1, cursorCol));
 
-      // 按行分组：先找到光标在哪一行
-      let rowCards = [];
-      let currentRowTop = -1;
+      // 遍历卡片，按行分组，找到光标所在的行
+      let rowStart = 0;
+      let rowTop = cards[0].offsetTop;
+      let rowHeight = cards[0].offsetHeight;
+
       for (let i = 0; i < cards.length; i++) {
-        const top = cards[i].offsetTop;
-        if (top !== currentRowTop) {
-          if (rowCards.length > 0) {
-            const nextRowTop = top;
-            const rowMidY = currentRowTop + (nextRowTop - currentRowTop) / 2;
-            if (relativeY < rowMidY) break; // 光标在上一行
+        const cardTop = cards[i].offsetTop;
+        const cardBottom = cardTop + cards[i].offsetHeight;
+
+        // 新行开始
+        if (cardTop > rowTop + 2) {
+          // 光标在当前行范围内
+          if (relativeY < cardTop) {
+            break;
           }
-          rowCards = [];
-          currentRowTop = top;
+          rowStart = i;
+          rowTop = cardTop;
+          rowHeight = cards[i].offsetHeight;
         }
-        rowCards.push(i);
+
+        // 光标在这一行的垂直范围内
+        if (relativeY >= rowTop && relativeY < rowTop + rowHeight + gap) {
+          // 在这一行中找到光标所在列对应的卡片
+          for (let j = rowStart; j < cards.length; j++) {
+            if (cards[j].offsetTop !== rowTop) break;
+            const cardLeft = cards[j].offsetLeft;
+            const cardRight = cardLeft + cards[j].offsetWidth;
+            const cardMidX = cardLeft + (cardRight - cardLeft) / 2;
+            if (relativeX < cardMidX) return j;
+          }
+          // 光标在该行所有卡片之后
+          let lastInRow = rowStart;
+          for (let j = rowStart; j < cards.length; j++) {
+            if (cards[j].offsetTop !== rowTop) break;
+            lastInRow = j;
+          }
+          return lastInRow + 1;
+        }
       }
 
-      // 在行内按列找位置
-      for (const idx of rowCards) {
-        const left = cards[idx].offsetLeft;
-        const right = left + cards[idx].offsetWidth;
-        const midX = left + (right - left) / 2;
-        if (relativeX < midX) return idx;
-      }
-
-      // 光标在当前行所有卡片之后
-      return rowCards.length > 0 ? rowCards[rowCards.length - 1] + 1 : cards.length;
+      // 光标在所有卡片下方
+      return cards.length;
     }
 
     function moveCardPlaceholderToSlot(slot) {
