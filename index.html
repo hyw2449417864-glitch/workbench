@@ -207,11 +207,54 @@
   .modal-footer .btn-confirm { padding: 8px 24px; border: none; border-radius: 6px; background: #e8613a; color: #fff; cursor: pointer; font-size: 14px; font-weight: 500; }
   .modal-footer .btn-confirm:hover { background: #d4532e; }
 
-  /* Config checkbox grid */
-  .config-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 16px; }
-  .config-item { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: #333; }
-  .config-item input[type="checkbox"] { accent-color: #e8613a; width: 16px; height: 16px; cursor: pointer; }
-  .config-item:hover { color: #e8613a; }
+  /* Config modal - card selection style */
+  .config-modal-dialog {
+    background: #fff; border-radius: 12px; padding: 0;
+    min-width: 720px; max-width: 860px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.15); animation: modalIn 0.2s ease;
+    max-height: 90vh; display: flex; flex-direction: column;
+  }
+  .config-modal-body {
+    padding: 20px 28px; overflow-y: auto; flex: 1;
+  }
+  .config-modal-body::-webkit-scrollbar { width: 5px; }
+  .config-section-title {
+    font-size: 15px; font-weight: 600; color: #1a1a1a;
+    margin: 20px 0 12px; padding-bottom: 8px;
+  }
+  .config-section-title:first-child { margin-top: 4px; }
+  .config-card-grid {
+    display: flex; flex-wrap: wrap; gap: 10px;
+  }
+  .config-card-item {
+    border: 1.5px solid #e8e8e8; border-radius: 8px; padding: 12px 14px;
+    cursor: pointer; transition: all 0.2s; background: #fff;
+    user-select: none; min-width: 120px;
+  }
+  .config-card-item:hover { border-color: #f0b89a; box-shadow: 0 1px 4px rgba(232,97,58,0.08); }
+  .config-card-item.selected { border-color: #e8613a; }
+  .config-card-item .cc-label { font-size: 13px; color: #333; margin-bottom: 4px; }
+  .config-card-item .cc-value { font-size: 18px; font-weight: 700; color: #1a1a1a; }
+  .config-card-item .cc-value.orange { color: #e8613a; }
+  .config-card-item .cc-value.red { color: #f5222d; }
+  .config-card-item .cc-sub { font-size: 11px; color: #999; margin-top: 2px; }
+  .config-card-item .cc-sub .val-orange { color: #e8613a; }
+  .config-card-item .cc-sub .val-red { color: #f5222d; }
+  .config-card-item .cc-sub .val-green { color: #52c41a; }
+  .config-card-item.cc-wide { min-width: 200px; flex: 1 1 200px; max-width: 340px; }
+  .config-card-item.cc-full { min-width: 280px; flex: 1 1 280px; max-width: 420px; }
+  .config-card-item .cc-thumb {
+    width: 100%; height: 48px; background: #fafafa; border-radius: 4px;
+    margin-top: 6px; display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .config-card-item .cc-thumb-inner {
+    transform: scale(0.35); transform-origin: center center;
+    opacity: 0.5; pointer-events: none; white-space: nowrap;
+  }
+  .config-card-item.cc-list { min-width: 240px; flex: 1 1 240px; max-width: 380px; }
+  .config-card-item.cc-list .cc-label { font-size: 13px; color: #333; margin-bottom: 6px; }
+  .config-card-item.cc-list .cc-thumb { height: 56px; }
 
   /* Confirm dialog */
   .confirm-dialog { min-width: 360px; max-width: 420px; }
@@ -227,7 +270,7 @@
   @media (max-width: 1200px) {
     .module-row { flex-direction: column; }
     .metrics-grid { grid-template-columns: repeat(12, 1fr); }
-    .config-grid { grid-template-columns: repeat(3, 1fr); }
+    .config-modal-dialog { min-width: 560px; }
   }
 </style>
 </head>
@@ -719,11 +762,9 @@
 
 <!-- 配置弹窗 -->
 <div class="modal-overlay" id="configModal">
-  <div class="modal-dialog">
+  <div class="config-modal-dialog">
     <div class="modal-header"><h3>工作台配置</h3></div>
-    <div class="modal-body">
-      <div class="config-grid" id="configGrid"></div>
-    </div>
+    <div class="config-modal-body" id="configModalBody"></div>
     <div class="modal-footer">
       <button class="btn-cancel" id="configCancelBtn">取消</button>
       <button class="btn-confirm" id="configConfirmBtn">完成配置</button>
@@ -1157,52 +1198,129 @@
     });
   });
 
-  // ==================== 模块配置弹窗 ====================
-  // 每个大模块的可配置小模块列表
+  // ==================== 模块配置弹窗（卡片选择样式） ====================
+  const moduleSectionNames = {
+    'long-course': '长线课行课个人看板',
+    'schedule': '近期课表',
+    'renewal': '续班看板（个人）',
+    'todo': '待办任务',
+    'notification': '消息通知',
+  };
+
   const moduleConfigMap = {
     'long-course': [
-      { id: 'lc-1', name: '带班个数', type: 'metric' },
-      { id: 'lc-2', name: '带学生总数', type: 'metric' },
-      { id: 'lc-3', name: '待进班学员', type: 'metric' },
-      { id: 'lc-4', name: '平均批改时效', type: 'metric' },
-      { id: 'lc-5', name: '超时批改份数', type: 'metric' },
-      { id: 'lc-6', name: '上课迟到次数', type: 'metric' },
-      { id: 'lc-7', name: '上课早退次数', type: 'metric' },
-      { id: 'lc-8', name: '留存率', type: 'metric' },
-      { id: 'lc-9', name: '完课率', type: 'metric' },
-      { id: 'lc-10', name: '作业提交率', type: 'metric' },
-      { id: 'lc-11', name: '流失率', type: 'metric' },
-      { id: 'lc-12', name: '行课评分', type: 'metric' },
-      { id: 'lc-class', name: '班级行课情况', type: 'inner' },
-      { id: 'lc-homework', name: '待批改作业', type: 'inner' },
+      { id: 'lc-1', name: '带班个数', colSpan: 1 },
+      { id: 'lc-2', name: '带学生总数', colSpan: 2 },
+      { id: 'lc-3', name: '待进班学员', colSpan: 1 },
+      { id: 'lc-4', name: '平均批改时效', colSpan: 1 },
+      { id: 'lc-5', name: '批改超时份数', colSpan: 2 },
+      { id: 'lc-6', name: '上课迟到次数', colSpan: 1 },
+      { id: 'lc-7', name: '上课早退次数', colSpan: 1 },
+      { id: 'lc-8', name: '留存率', colSpan: 1 },
+      { id: 'lc-9', name: '完课率', colSpan: 2 },
+      { id: 'lc-10', name: '作业提交率', colSpan: 2 },
+      { id: 'lc-11', name: '流失率', colSpan: 1 },
+      { id: 'lc-12', name: '行课评分', colSpan: 1 },
+      { id: 'lc-class', name: '班级行课情况列表', colSpan: 0, listType: true },
+      { id: 'lc-homework', name: '待批改作业列表', colSpan: 0, listType: true },
     ],
     'schedule': [
-      { id: 'sch-weekly', name: '本周课表', type: 'inner' },
+      { id: 'sch-weekly', name: '本周课表', colSpan: 0, listType: true },
     ],
     'renewal': [
-      { id: 'rn-1', name: '续班基数', type: 'metric' },
-      { id: 'rn-2', name: '已续班人数', type: 'metric' },
-      { id: 'rn-3', name: '当日跟进反馈人数', type: 'metric' },
-      { id: 'rn-4', name: '当日续报人数覆盖人数', type: 'metric' },
-      { id: 'rn-5', name: '实时续班率', type: 'metric' },
-      { id: 'rn-6', name: '续班期拓科人数', type: 'metric' },
-      { id: 'rn-7', name: '学科续班总排名', type: 'metric' },
-      { id: 'rn-8', name: '续班期续班率', type: 'metric' },
-      { id: 'rn-9', name: '最终续班率', type: 'metric' },
+      { id: 'rn-1', name: '续班基数', colSpan: 1 },
+      { id: 'rn-2', name: '已续班人数', colSpan: 1 },
+      { id: 'rn-3', name: '当日跟进反馈人数', colSpan: 1 },
+      { id: 'rn-4', name: '当日续报人数覆盖人数', colSpan: 1 },
+      { id: 'rn-5', name: '实时续班率', colSpan: 2 },
+      { id: 'rn-6', name: '续班期拓科人数', colSpan: 1 },
+      { id: 'rn-7', name: '学科续班总排名', colSpan: 1 },
+      { id: 'rn-8', name: '续班期续班率', colSpan: 2 },
+      { id: 'rn-9', name: '最终续班率', colSpan: 2 },
     ],
     'todo': [
-      { id: 'todo-list', name: '待办任务列表', type: 'inner' },
+      { id: 'todo-list', name: '待办任务列表', colSpan: 0, listType: true },
     ],
     'notification': [
-      { id: 'notif-list', name: '消息通知列表', type: 'inner' },
+      { id: 'notif-list', name: '消息通知列表', colSpan: 0, listType: true },
     ],
   };
 
   const configModal = document.getElementById('configModal');
-  const configGrid = document.getElementById('configGrid');
+  const configModalBody = document.getElementById('configModalBody');
   const configCancelBtn = document.getElementById('configCancelBtn');
   const configConfirmBtn = document.getElementById('configConfirmBtn');
   let currentConfigModule = null;
+  let configSelections = {};
+
+  function getMetricPreview(id) {
+    const el = document.querySelector('[data-metric-id="' + id + '"]');
+    if (!el) return { value: '***', sub: '' };
+    const valueEl = el.querySelector('.metric-value');
+    const subEl = el.querySelector('.metric-sub');
+    const value = valueEl ? valueEl.textContent.trim() : '***';
+    const sub = subEl ? subEl.innerHTML : '';
+    const isOrange = valueEl && valueEl.classList.contains('orange');
+    const isRed = valueEl && valueEl.classList.contains('red');
+    return { value, sub, isOrange, isRed };
+  }
+
+  function openConfigModal(moduleName) {
+    currentConfigModule = moduleName;
+    const items = moduleConfigMap[moduleName] || [];
+    const sectionName = moduleSectionNames[moduleName] || '';
+
+    // 初始化选中状态
+    configSelections = {};
+    items.forEach(item => {
+      const el = document.querySelector('[data-metric-id="' + item.id + '"], [data-inner-id="' + item.id + '"]');
+      configSelections[item.id] = !(el && el.style.display === 'none');
+    });
+
+    renderConfigModal(sectionName, items);
+    configModal.classList.add('active');
+  }
+
+  function renderConfigModal(sectionName, items) {
+    let html = '<div class="config-section-title">' + sectionName + '</div>';
+    html += '<div class="config-card-grid">';
+
+    items.forEach(item => {
+      const selected = configSelections[item.id] !== false;
+      const cls = 'config-card-item' + (selected ? ' selected' : '');
+
+      if (item.listType) {
+        html += '<div class="' + cls + ' cc-list" data-config-id="' + item.id + '">';
+        html += '<div class="cc-label">' + item.name + '</div>';
+        html += '<div class="cc-thumb"><div class="cc-thumb-inner">📋</div></div>';
+        html += '</div>';
+      } else {
+        const preview = getMetricPreview(item.id);
+        const wideCls = item.colSpan >= 2 ? ' cc-wide' : '';
+        const valCls = preview.isOrange ? ' orange' : (preview.isRed ? ' red' : '');
+
+        html += '<div class="' + cls + wideCls + '" data-config-id="' + item.id + '">';
+        html += '<div class="cc-label">' + item.name + '</div>';
+        html += '<div class="cc-value' + valCls + '">' + preview.value + '</div>';
+        if (preview.sub) {
+          html += '<div class="cc-sub">' + preview.sub + '</div>';
+        }
+        html += '</div>';
+      }
+    });
+
+    html += '</div>';
+    configModalBody.innerHTML = html;
+
+    // 绑定点击事件
+    configModalBody.querySelectorAll('.config-card-item').forEach(card => {
+      card.addEventListener('click', function() {
+        const id = this.dataset.configId;
+        configSelections[id] = !configSelections[id];
+        this.classList.toggle('selected', configSelections[id]);
+      });
+    });
+  }
 
   // 点击模块设置按钮
   document.querySelectorAll('.module-settings-btn').forEach(btn => {
@@ -1210,31 +1328,9 @@
       e.stopPropagation();
       e.preventDefault();
       const moduleName = this.dataset.configModule;
-      currentConfigModule = moduleName;
       openConfigModal(moduleName);
     });
   });
-
-  function openConfigModal(moduleName) {
-    const items = moduleConfigMap[moduleName] || [];
-    configGrid.innerHTML = '';
-    items.forEach(item => {
-      const label = document.createElement('label');
-      label.className = 'config-item';
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.checked = true;
-      checkbox.dataset.configId = item.id;
-      checkbox.dataset.configType = item.type;
-      // 检查当前是否已隐藏
-      const el = document.querySelector('[data-metric-id="' + item.id + '"], [data-inner-id="' + item.id + '"]');
-      if (el && el.style.display === 'none') checkbox.checked = false;
-      label.appendChild(checkbox);
-      label.appendChild(document.createTextNode(item.name));
-      configGrid.appendChild(label);
-    });
-    configModal.classList.add('active');
-  }
 
   configCancelBtn.addEventListener('click', function() {
     configModal.classList.remove('active');
@@ -1242,20 +1338,16 @@
   });
 
   configConfirmBtn.addEventListener('click', function() {
-    const checkboxes = configGrid.querySelectorAll('input[type="checkbox"]');
-    checkboxes.forEach(cb => {
-      const id = cb.dataset.configId;
-      const type = cb.dataset.configType;
+    Object.keys(configSelections).forEach(id => {
       const el = document.querySelector('[data-metric-id="' + id + '"], [data-inner-id="' + id + '"]');
       if (el) {
-        el.style.display = cb.checked ? '' : 'none';
+        el.style.display = configSelections[id] ? '' : 'none';
       }
     });
     configModal.classList.remove('active');
     currentConfigModule = null;
   });
 
-  // 点击遮罩关闭
   configModal.addEventListener('click', function(e) {
     if (e.target === configModal) {
       configModal.classList.remove('active');
