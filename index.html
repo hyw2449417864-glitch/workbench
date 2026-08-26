@@ -1265,51 +1265,57 @@
     return { value, sub, isOrange, isRed };
   }
 
-  function openConfigModal(moduleName) {
-    currentConfigModule = moduleName;
-    const items = moduleConfigMap[moduleName] || [];
-    const sectionName = moduleSectionNames[moduleName] || '';
-
-    // 初始化选中状态
+  function openConfigModal() {
+    // 初始化所有模块的选中状态
     configSelections = {};
-    items.forEach(item => {
-      const el = document.querySelector('[data-metric-id="' + item.id + '"], [data-inner-id="' + item.id + '"]');
-      configSelections[item.id] = !(el && el.style.display === 'none');
+    Object.keys(moduleConfigMap).forEach(modKey => {
+      const items = moduleConfigMap[modKey];
+      items.forEach(item => {
+        const el = document.querySelector('[data-metric-id="' + item.id + '"], [data-inner-id="' + item.id + '"]');
+        configSelections[item.id] = !(el && el.style.display === 'none');
+      });
     });
 
-    renderConfigModal(sectionName, items);
+    renderAllConfigModules();
     configModal.classList.add('active');
   }
 
-  function renderConfigModal(sectionName, items) {
-    let html = '<div class="config-section-title">' + sectionName + '</div>';
-    html += '<div class="config-card-grid">';
+  function renderAllConfigModules() {
+    let html = '';
+    const moduleOrder = ['long-course', 'schedule', 'renewal', 'todo', 'notification'];
+    moduleOrder.forEach(modKey => {
+      const sectionName = moduleSectionNames[modKey] || '';
+      const items = moduleConfigMap[modKey] || [];
+      html += '<div class="config-section-title">' + sectionName + '</div>';
+      html += '<div class="config-card-grid">';
 
-    items.forEach(item => {
-      const selected = configSelections[item.id] !== false;
-      const cls = 'config-card-item' + (selected ? ' selected' : '');
+      items.forEach(item => {
+        const selected = configSelections[item.id] !== false;
+        const cls = 'config-card-item' + (selected ? ' selected' : '');
 
-      if (item.listType) {
-        html += '<div class="' + cls + ' cc-list" data-config-id="' + item.id + '">';
-        html += '<div class="cc-label">' + item.name + '</div>';
-        html += '<div class="cc-thumb"><div class="cc-thumb-inner">📋</div></div>';
-        html += '</div>';
-      } else {
-        const preview = getMetricPreview(item.id);
-        const wideCls = item.colSpan >= 2 ? ' cc-wide' : '';
-        const valCls = preview.isOrange ? ' orange' : (preview.isRed ? ' red' : '');
+        if (item.listType) {
+          html += '<div class="' + cls + ' cc-list" data-config-id="' + item.id + '">';
+          html += '<div class="cc-label">' + item.name + '</div>';
+          html += '<div class="cc-thumb"><div class="cc-thumb-inner">📋</div></div>';
+          html += '</div>';
+        } else {
+          const preview = getMetricPreview(item.id);
+          const wideCls = item.colSpan >= 2 ? ' cc-wide' : '';
+          const valCls = preview.isOrange ? ' orange' : (preview.isRed ? ' red' : '');
 
-        html += '<div class="' + cls + wideCls + '" data-config-id="' + item.id + '">';
-        html += '<div class="cc-label">' + item.name + '</div>';
-        html += '<div class="cc-value' + valCls + '">' + preview.value + '</div>';
-        if (preview.sub) {
-          html += '<div class="cc-sub">' + preview.sub + '</div>';
+          html += '<div class="' + cls + wideCls + '" data-config-id="' + item.id + '">';
+          html += '<div class="cc-label">' + item.name + '</div>';
+          html += '<div class="cc-value' + valCls + '">' + preview.value + '</div>';
+          if (preview.sub) {
+            html += '<div class="cc-sub">' + preview.sub + '</div>';
+          }
+          html += '</div>';
         }
-        html += '</div>';
-      }
+      });
+
+      html += '</div>';
     });
 
-    html += '</div>';
     configModalBody.innerHTML = html;
 
     // 绑定点击事件
@@ -1322,13 +1328,12 @@
     });
   }
 
-  // 点击模块设置按钮
+  // 点击任意模块设置按钮，打开包含所有模块的配置面板
   document.querySelectorAll('.module-settings-btn').forEach(btn => {
     btn.addEventListener('click', function(e) {
       e.stopPropagation();
       e.preventDefault();
-      const moduleName = this.dataset.configModule;
-      openConfigModal(moduleName);
+      openConfigModal();
     });
   });
 
