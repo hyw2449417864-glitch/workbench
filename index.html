@@ -172,16 +172,13 @@
   .inner-module { padding: 0; }
   .inner-module + .inner-module { border-top: 1px solid #f0f0f0; padding-top: 16px; margin-top: 16px; }
 
-  /* Metrics grid with resize support */
+  /* Metrics grid - content-based dynamic width */
   .metrics-grid {
-    display: grid; grid-template-columns: repeat(12, 1fr); gap: 12px;
+    display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start;
   }
-  .metric-card[data-col-span="1"] { grid-column: span 2; }
-  .metric-card[data-col-span="2"] { grid-column: span 3; }
-  .metric-card[data-col-span="3"] { grid-column: span 4; }
-  .metric-card[data-col-span="4"] { grid-column: span 6; }
-  .metric-card[data-col-span="5"] { grid-column: span 8; }
-  .metric-card[data-col-span="6"] { grid-column: span 12; }
+  .metric-card {
+    flex: 0 0 auto; width: fit-content; min-width: 130px; max-width: 100%;
+  }
 
   /* Drag ghost */
   .drag-ghost { position: fixed; pointer-events: none; z-index: 9999; opacity: 0.85; }
@@ -337,7 +334,6 @@
   /* Responsive */
   @media (max-width: 1200px) {
     .module-row { flex-direction: column; }
-    .metrics-grid { grid-template-columns: repeat(12, 1fr); }
     .config-modal-dialog { min-width: 560px; }
   }
 </style>
@@ -1630,8 +1626,6 @@
           resizeStartX = e.clientX;
           resizeStartWidth = card.offsetWidth;
           resizeGridWidth = grid.offsetWidth;
-          const gap = 12;
-          resizeColUnit = (resizeGridWidth - gap * 11) / 12;
           card.classList.add('resizing');
         });
       }
@@ -1650,9 +1644,8 @@
           cardPlaceholder = document.createElement('div');
           cardPlaceholder.className = 'inner-drag-placeholder';
           cardPlaceholder.style.height = dragCard.offsetHeight + 'px';
-          const colSpan = dragCard.getAttribute('data-col-span') || '1';
-          const spanMap = { '1': 'span 2', '2': 'span 3', '3': 'span 4', '4': 'span 6', '5': 'span 8', '6': 'span 12' };
-          cardPlaceholder.style.gridColumn = spanMap[colSpan] || 'span 2';
+          cardPlaceholder.style.width = dragCard.offsetWidth + 'px';
+          cardPlaceholder.style.flexShrink = '0';
           dragCard.parentNode.insertBefore(cardPlaceholder, dragCard);
 
           const rect = dragCard.getBoundingClientRect();
@@ -1680,21 +1673,10 @@
       // 调整大小
       if (resizeCard) {
         const dx = e.clientX - resizeStartX;
-        const newWidth = resizeStartWidth + dx;
-        const gap = 12;
-        const colUnit = (resizeGridWidth - gap * 11) / 12;
-
-        let colSpan = Math.round((newWidth + gap) / (colUnit + gap));
-        colSpan = Math.max(2, Math.min(12, colSpan));
-
-        const spanMap = { 2: '1', 3: '2', 4: '3', 6: '4', 8: '5', 12: '6' };
-        const spans = [2, 3, 4, 6, 8, 12];
-        let closest = spans[0];
-        for (const s of spans) {
-          if (Math.abs(s - colSpan) < Math.abs(closest - colSpan)) closest = s;
-        }
-        const dataSpan = spanMap[closest] || '1';
-        resizeCard.setAttribute('data-col-span', dataSpan);
+        const newWidth = Math.max(130, resizeStartWidth + dx);
+        const maxWidth = grid.offsetWidth;
+        resizeCard.style.width = Math.min(newWidth, maxWidth) + 'px';
+        resizeCard.setAttribute('data-resized', 'true');
       }
     });
 
