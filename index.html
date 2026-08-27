@@ -256,6 +256,18 @@
   .config-card-item.cc-list .cc-label { font-size: 13px; color: #333; margin-bottom: 6px; }
   .config-card-item.cc-list .cc-thumb { height: 56px; }
 
+  /* Top nav tabs (经营看板/老师看板/运营看板) */
+  .top-nav { display: flex; gap: 12px; margin-bottom: 16px; }
+  .top-nav-tab { padding: 6px 18px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 14px; color: #333; cursor: pointer; background: #fff; transition: all 0.2s; }
+  .top-nav-tab:hover { color: #e8613a; border-color: #e8613a; }
+  .top-nav-tab.active { color: #e8613a; border-color: #e8613a; background: #fff7f0; font-weight: 500; }
+
+  /* Schedule today badge */
+  .sg-header .today-badge { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; background: #e8613a; color: #fff; border-radius: 5px; font-size: 12px; font-weight: 600; }
+
+  /* Metric label extra icons */
+  .label-icons { display: inline-flex; gap: 4px; margin-left: 4px; color: #bbb; font-size: 12px; vertical-align: middle; }
+
   /* Confirm dialog */
   .confirm-dialog { min-width: 360px; max-width: 420px; }
   .confirm-dialog .modal-body { text-align: center; padding: 28px 24px; }
@@ -298,10 +310,17 @@
   <!-- Main Content -->
   <div class="main" id="mainContent">
 
-    <!-- Row 1: 长线课行课个人看板 -->
+    <!-- 顶部导航 -->
+    <div class="top-nav">
+      <div class="top-nav-tab">经营看板</div>
+      <div class="top-nav-tab active">老师看板</div>
+      <div class="top-nav-tab">运营看板</div>
+    </div>
+
+    <!-- Row 1: 长线课行课看板 -->
     <div class="module-row full">
       <div class="module-card" draggable="true" data-module="long-course">
-        <div class="module-title"><span class="drag-handle">⠿</span>长线课行课个人看板</div>
+        <div class="module-title"><span class="drag-handle">⠿</span>长线课行课看板</div>
         <button class="module-settings-btn" data-config-module="long-course" title="模块设置">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         </button>
@@ -326,8 +345,8 @@
           <div class="inner-module" data-inner-id="lc-overview">
             <div class="section-title">数据概览</div>
             <div class="metrics-grid">
-              <div class="metric-card" data-metric-id="lc-1" data-col-span="1">
-                <div class="metric-label">带班个数 <span class="settings-icon"></span></div>
+              <div class="metric-card" data-metric-id="lc-1" data-col-span="2">
+                <div class="metric-label">带班个数 <span class="label-icons">⊞ ⊖</span></div>
                 <div class="metric-value">216</div>
                 <button class="metric-remove-btn" data-remove-id="lc-1" data-remove-name="带班个数" title="移除">&times;</button>
                 <div class="resize-handle"></div>
@@ -339,16 +358,22 @@
                 <button class="metric-remove-btn" data-remove-id="lc-2" data-remove-name="带学生总数" title="移除">&times;</button>
                 <div class="resize-handle"></div>
               </div>
-              <div class="metric-card" data-metric-id="lc-3" data-col-span="1">
+              <div class="metric-card" data-metric-id="lc-3" data-col-span="2">
                 <div class="metric-label">待进班学员</div>
                 <div class="metric-value orange">3</div>
                 <button class="metric-remove-btn" data-remove-id="lc-3" data-remove-name="待进班学员" title="移除">&times;</button>
                 <div class="resize-handle"></div>
               </div>
-              <div class="metric-card" data-metric-id="lc-4" data-col-span="1">
+              <div class="metric-card" data-metric-id="lc-4" data-col-span="2">
                 <div class="metric-label">平均批改时效</div>
                 <div class="metric-value">16.13小时</div>
                 <button class="metric-remove-btn" data-remove-id="lc-4" data-remove-name="平均批改时效" title="移除">&times;</button>
+                <div class="resize-handle"></div>
+              </div>
+              <div class="metric-card" data-metric-id="lc-13" data-col-span="2">
+                <div class="metric-label">待批改作业</div>
+                <div class="metric-value red">12</div>
+                <button class="metric-remove-btn" data-remove-id="lc-13" data-remove-name="待批改作业" title="移除">&times;</button>
                 <div class="resize-handle"></div>
               </div>
               <div class="metric-card" data-metric-id="lc-5" data-col-span="2">
@@ -358,22 +383,16 @@
                 <button class="metric-remove-btn" data-remove-id="lc-5" data-remove-name="批改超时份数" title="移除">&times;</button>
                 <div class="resize-handle"></div>
               </div>
-              <div class="metric-card" data-metric-id="lc-6" data-col-span="1">
-                <div class="metric-label">上课迟到次数</div>
-                <div class="metric-value red">2</div>
-                <button class="metric-remove-btn" data-remove-id="lc-6" data-remove-name="上课迟到次数" title="移除">&times;</button>
-                <div class="resize-handle"></div>
-              </div>
-              <div class="metric-card" data-metric-id="lc-7" data-col-span="1">
-                <div class="metric-label">上课早退次数</div>
-                <div class="metric-value">0</div>
-                <button class="metric-remove-btn" data-remove-id="lc-7" data-remove-name="上课早退次数" title="移除">&times;</button>
-                <div class="resize-handle"></div>
-              </div>
-              <div class="metric-card" data-metric-id="lc-8" data-col-span="1">
+              <div class="metric-card" data-metric-id="lc-8" data-col-span="2">
                 <div class="metric-label">留存率</div>
                 <div class="metric-value">83.55%</div>
                 <button class="metric-remove-btn" data-remove-id="lc-8" data-remove-name="留存率" title="移除">&times;</button>
+                <div class="resize-handle"></div>
+              </div>
+              <div class="metric-card" data-metric-id="lc-14" data-col-span="2">
+                <div class="metric-label">出勤率</div>
+                <div class="metric-value">83.55%</div>
+                <button class="metric-remove-btn" data-remove-id="lc-14" data-remove-name="出勤率" title="移除">&times;</button>
                 <div class="resize-handle"></div>
               </div>
               <div class="metric-card" data-metric-id="lc-9" data-col-span="2">
@@ -390,18 +409,48 @@
                 <button class="metric-remove-btn" data-remove-id="lc-10" data-remove-name="作业提交率" title="移除">&times;</button>
                 <div class="resize-handle"></div>
               </div>
-              <div class="metric-card" data-metric-id="lc-11" data-col-span="1">
+              <div class="metric-card" data-metric-id="lc-11" data-col-span="2">
                 <div class="metric-label">流失率</div>
                 <div class="metric-value">5.88%</div>
                 <div class="metric-sub">流失人数：<span class="val-orange">23</span></div>
                 <button class="metric-remove-btn" data-remove-id="lc-11" data-remove-name="流失率" title="移除">&times;</button>
                 <div class="resize-handle"></div>
               </div>
-              <div class="metric-card" data-metric-id="lc-12" data-col-span="1">
+              <div class="metric-card" data-metric-id="lc-12" data-col-span="2">
                 <div class="metric-label">行课评分</div>
                 <div class="metric-value">92.56</div>
                 <div class="metric-sub">平均行课评分：92.55</div>
                 <button class="metric-remove-btn" data-remove-id="lc-12" data-remove-name="行课评分" title="移除">&times;</button>
+                <div class="resize-handle"></div>
+              </div>
+              <div class="metric-card" data-metric-id="lc-15" data-col-span="2">
+                <div class="metric-label">流失记录待审核</div>
+                <div class="metric-value red">13</div>
+                <button class="metric-remove-btn" data-remove-id="lc-15" data-remove-name="流失记录待审核" title="移除">&times;</button>
+                <div class="resize-handle"></div>
+              </div>
+              <div class="metric-card" data-metric-id="lc-16" data-col-span="2">
+                <div class="metric-label">修改课后闭环待审核</div>
+                <div class="metric-value red">8</div>
+                <button class="metric-remove-btn" data-remove-id="lc-16" data-remove-name="修改课后闭环待审核" title="移除">&times;</button>
+                <div class="resize-handle"></div>
+              </div>
+              <div class="metric-card" data-metric-id="lc-17" data-col-span="2">
+                <div class="metric-label">用户意见反馈通知</div>
+                <div class="metric-value red">8</div>
+                <button class="metric-remove-btn" data-remove-id="lc-17" data-remove-name="用户意见反馈通知" title="移除">&times;</button>
+                <div class="resize-handle"></div>
+              </div>
+              <div class="metric-card" data-metric-id="lc-6" data-col-span="2">
+                <div class="metric-label">上课迟到次数</div>
+                <div class="metric-value red">2</div>
+                <button class="metric-remove-btn" data-remove-id="lc-6" data-remove-name="上课迟到次数" title="移除">&times;</button>
+                <div class="resize-handle"></div>
+              </div>
+              <div class="metric-card" data-metric-id="lc-7" data-col-span="2">
+                <div class="metric-label">上课早退次数</div>
+                <div class="metric-value">0</div>
+                <button class="metric-remove-btn" data-remove-id="lc-7" data-remove-name="上课早退次数" title="移除">&times;</button>
                 <div class="resize-handle"></div>
               </div>
             </div>
@@ -497,7 +546,7 @@
               <div class="sg-header"></div>
               <div class="sg-header">周一</div>
               <div class="sg-header">周二</div>
-              <div class="sg-header today">周三</div>
+              <div class="sg-header today"><span class="today-badge">今</span><br>周三</div>
               <div class="sg-header">周四</div>
               <div class="sg-header">周五</div>
               <div class="sg-header">周六</div>
@@ -573,7 +622,7 @@
     <!-- Row 3: 续班个人看板 -->
     <div class="module-row full">
       <div class="module-card" draggable="true" data-module="renewal">
-        <div class="module-title"><span class="drag-handle"></span>续班个人看板</div>
+        <div class="module-title"><span class="drag-handle">⠿</span>续班看板</div>
         <button class="module-settings-btn" data-config-module="renewal" title="模块设置">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         </button>
@@ -655,6 +704,12 @@
                 <div class="metric-sub">续班目标：90.00%；目标差值：<span class="val-red">-1.25%</span></div>
                 <div class="metric-sub">已达标人数：<span class="val-green">23</span></div>
                 <button class="metric-remove-btn" data-remove-id="rn-9" data-remove-name="最终续班率" title="移除">&times;</button>
+                <div class="resize-handle"></div>
+              </div>
+              <div class="metric-card" data-metric-id="rn-10" data-col-span="2">
+                <div class="metric-label">修改续班状态待审核</div>
+                <div class="metric-value red">14</div>
+                <button class="metric-remove-btn" data-remove-id="rn-10" data-remove-name="修改续班状态待审核" title="移除">&times;</button>
                 <div class="resize-handle"></div>
               </div>
             </div>
@@ -1210,11 +1265,19 @@
     });
   });
 
+  // ==================== 顶部导航 Tab 切换 ====================
+  document.querySelectorAll('.top-nav-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.top-nav-tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+
   // ==================== 模块配置弹窗（卡片选择样式） ====================
   const moduleSectionNames = {
-    'long-course': '长线课行课个人看板',
+    'long-course': '长线课行课看板',
     'schedule': '近期课表',
-    'renewal': '续班看板（个人）',
+    'renewal': '续班看板',
     'todo': '待办任务',
     'notification': '消息通知',
   };
@@ -1225,14 +1288,19 @@
       { id: 'lc-2', name: '带学生总数', colSpan: 2 },
       { id: 'lc-3', name: '待进班学员', colSpan: 1 },
       { id: 'lc-4', name: '平均批改时效', colSpan: 1 },
+      { id: 'lc-13', name: '待批改作业', colSpan: 1 },
       { id: 'lc-5', name: '批改超时份数', colSpan: 2 },
-      { id: 'lc-6', name: '上课迟到次数', colSpan: 1 },
-      { id: 'lc-7', name: '上课早退次数', colSpan: 1 },
       { id: 'lc-8', name: '留存率', colSpan: 1 },
+      { id: 'lc-14', name: '出勤率', colSpan: 1 },
       { id: 'lc-9', name: '完课率', colSpan: 2 },
       { id: 'lc-10', name: '作业提交率', colSpan: 2 },
       { id: 'lc-11', name: '流失率', colSpan: 1 },
       { id: 'lc-12', name: '行课评分', colSpan: 1 },
+      { id: 'lc-15', name: '流失记录待审核', colSpan: 1 },
+      { id: 'lc-16', name: '修改课后闭环待审核', colSpan: 1 },
+      { id: 'lc-17', name: '用户意见反馈通知', colSpan: 1 },
+      { id: 'lc-6', name: '上课迟到次数', colSpan: 1 },
+      { id: 'lc-7', name: '上课早退次数', colSpan: 1 },
       { id: 'lc-class', name: '班级行课情况列表', colSpan: 0, listType: true },
       { id: 'lc-homework', name: '待批改作业列表', colSpan: 0, listType: true },
     ],
@@ -1249,6 +1317,7 @@
       { id: 'rn-7', name: '学科续班总排名', colSpan: 1 },
       { id: 'rn-8', name: '续班期续班率', colSpan: 2 },
       { id: 'rn-9', name: '最终续班率', colSpan: 2 },
+      { id: 'rn-10', name: '修改续班状态待审核', colSpan: 1 },
     ],
     'todo': [
       { id: 'todo-list', name: '待办任务列表', colSpan: 0, listType: true },
