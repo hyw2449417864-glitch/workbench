@@ -10,6 +10,8 @@
 
   /* Header */
   .header { background: #fff; height: 48px; display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid #e8e8e8; position: sticky; top: 0; z-index: 100; }
+  .hamburger-btn { display: none; width: 32px; height: 32px; border: none; background: transparent; cursor: pointer; align-items: center; justify-content: center; font-size: 20px; color: #333; margin-right: 8px; border-radius: 4px; }
+  .hamburger-btn:hover { background: #f5f5f5; }
   .header-logo { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600; color: #333; }
   .header-logo .logo-icon { width: 28px; height: 28px; background: #e8613a; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 700; }
   .header-logo .logo-text { color: #e8613a; }
@@ -340,12 +342,115 @@
     .metrics-grid { grid-template-columns: repeat(12, 1fr); }
     .config-modal-dialog { min-width: 560px; }
   }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .header { padding: 0 12px; }
+    .header-nav { display: none; }
+    .header-logo .logo-sub { display: none; }
+    .hamburger-btn { display: flex !important; }
+
+    .layout { flex-direction: column; }
+    .sidebar {
+      display: none; position: fixed; top: 48px; left: 0; bottom: 0; width: 200px;
+      z-index: 1000; box-shadow: 2px 0 12px rgba(0,0,0,0.1); padding-top: 8px;
+    }
+    .sidebar.open { display: block; }
+    .sidebar-overlay {
+      display: none; position: fixed; top: 48px; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.3); z-index: 999;
+    }
+    .sidebar-overlay.open { display: block; }
+
+    .main { padding: 10px; }
+
+    .top-nav { gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+    .top-nav-tab { white-space: nowrap; padding: 5px 14px; font-size: 13px; }
+
+    .module-card { padding: 14px; }
+    .module-card .module-title { font-size: 16px; margin-bottom: 12px; padding-right: 36px; }
+    .module-card .drag-handle { display: none; }
+    .module-settings-btn { top: 12px; right: 12px; width: 28px; height: 28px; }
+
+    .filter-bar { gap: 8px; }
+    .filter-bar label { font-size: 12px; }
+    .filter-bar select { min-width: 80px; font-size: 12px; padding: 4px 20px 4px 8px; }
+    .filter-bar .date-range { min-width: 160px; font-size: 12px; }
+    .filter-bar .btn-quick { padding: 4px 10px; font-size: 12px; }
+    .filter-bar .btn-search { padding: 4px 14px; font-size: 12px; }
+
+    .metrics-grid { grid-template-columns: repeat(12, 1fr); gap: 8px; }
+    .metric-card[data-col-span="1"] { grid-column: span 6; }
+    .metric-card[data-col-span="2"] { grid-column: span 6; }
+    .metric-card[data-col-span="3"] { grid-column: span 12; }
+    .metric-card[data-col-span="4"] { grid-column: span 12; }
+    .metric-card[data-col-span="5"] { grid-column: span 12; }
+    .metric-card[data-col-span="6"] { grid-column: span 12; }
+    .metric-card { padding: 10px 12px; }
+    .metric-card .metric-value { font-size: 20px; }
+    .metric-card .metric-label { font-size: 11px; }
+    .metric-card .metric-sub { font-size: 10px; }
+    .resize-handle { display: none; }
+    .metric-remove-btn { display: none !important; }
+
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .data-table { min-width: 700px; font-size: 12px; }
+    .data-table th, .data-table td { padding: 8px 6px; }
+
+    .schedule-grid { grid-template-columns: 40px repeat(7, 1fr); font-size: 11px; }
+    .schedule-grid .sg-header { padding: 6px 2px; font-size: 11px; }
+    .schedule-grid .sg-row-label { font-size: 11px; padding: 8px 4px; }
+    .schedule-item { font-size: 10px; padding: 3px 4px; }
+    .schedule-item .time { font-size: 10px; }
+    .schedule-item .course-name { font-size: 10px; }
+
+    .pie-wrap { flex-direction: column; align-items: center; gap: 10px; }
+    .pie-chart { width: 110px; height: 110px; }
+    .pie-legend { flex-direction: row; flex-wrap: wrap; gap: 4px 10px; justify-content: center; }
+
+    .stacked-bars { height: 180px; padding: 0 8px; gap: 6px; }
+    .sb-track { max-width: 28px; }
+    .sb-name { font-size: 10px; }
+    .bar-legend { flex-wrap: wrap; gap: 10px; }
+    .bar-summary-row { grid-template-columns: 1fr; gap: 12px; }
+    .bar-summary-item { border-right: none; border-bottom: 1px solid #f0f0f0; padding-bottom: 12px; }
+    .bar-summary-item:last-child { border-bottom: none; }
+
+    .progress-row { font-size: 11px; }
+    .progress-row .pr-label { width: 28px; }
+    .progress-row .pr-value { width: 44px; font-size: 11px; }
+
+    .panel-header .title { font-size: 15px; }
+    .panel-header .subtitle { font-size: 11px; }
+    .tag-tabs { gap: 6px; }
+    .tag-tab { padding: 3px 10px; font-size: 12px; }
+    .todo-item { padding: 10px 0; }
+    .todo-title { font-size: 13px; }
+    .todo-detail { font-size: 12px; }
+    .notif-item { padding: 10px 0; }
+    .notif-type { font-size: 13px; }
+    .notif-content { font-size: 12px; }
+    .notif-time { font-size: 11px; }
+
+    .config-modal-dialog { min-width: unset; max-width: 100%; width: 100%; max-height: 100vh; border-radius: 0; }
+    .config-modal-body { padding: 16px; }
+    .config-card-grid { gap: 8px; }
+    .config-card-item { min-width: 100px; padding: 10px 12px; }
+    .config-card-item.cc-wide { min-width: 160px; flex: 1 1 160px; max-width: 100%; }
+    .config-card-item.cc-list { min-width: 180px; flex: 1 1 180px; max-width: 100%; }
+
+    .modal-dialog { min-width: unset; max-width: 90%; width: 90%; }
+
+    .inner-module + .inner-module { padding-top: 12px; margin-top: 12px; }
+    .section-title { font-size: 14px; margin: 14px 0 10px; }
+  }
 </style>
 </head>
 <body>
 
 <!-- Header -->
 <div class="header">
+  <button class="hamburger-btn" id="hamburgerBtn">☰</button>
   <div class="header-logo">
     <div class="logo-icon">K</div>
     <span class="logo-text">拾伍素养</span>
@@ -356,6 +461,8 @@
     <div class="header-avatar">廖文</div>
   </div>
 </div>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
 
 <div class="layout">
   <!-- Sidebar -->
@@ -1769,6 +1876,23 @@
       });
     });
   });
+
+  // ==================== 移动端汉堡菜单 ====================
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  const sidebar = document.querySelector('.sidebar');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+  function toggleSidebar() {
+    sidebar.classList.toggle('open');
+    sidebarOverlay.classList.toggle('open');
+  }
+
+  if (hamburgerBtn) {
+    hamburgerBtn.addEventListener('click', toggleSidebar);
+  }
+  if (sidebarOverlay) {
+    sidebarOverlay.addEventListener('click', toggleSidebar);
+  }
 
   // ==================== 模块配置弹窗（卡片选择样式） ====================
   const moduleSectionNames = {
